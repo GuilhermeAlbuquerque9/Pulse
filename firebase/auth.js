@@ -2,35 +2,32 @@ import { app }
 from "./firebase-config.js";
 
 import {
-
-getAuth,
-signInAnonymously
-
+    getAuth,
+    signInAnonymously
 }
 from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const auth =
 getAuth(app);
 
-export async function loginAnonymous(){
+export async function anonymousLogin(){
 
-try{
+    try{
 
-const result =
-await signInAnonymously(auth);
+        const result =
+        await signInAnonymously(auth);
 
-console.log(
-"Usuário:",
-result.user.uid
-);
+        console.log(
+            "Usuário anônimo:",
+            result.user.uid
+        );
 
-return result.user;
+        return result.user;
 
-}
-catch(error){
+    }
+    catch(error){
 
-console.error(error);
-
-}
+        console.error(error);
+    }
 
 }
