@@ -40,39 +40,85 @@ document.getElementById("dislikeButton");
 
 let currentNews = null;
 
+let newsList = [];
+
 
 // ==========================
-// FEED TEMPORÁRIO
-// (será trocado pelo Firebase)
+// CARREGAR FEED REAL
 // ==========================
 
-let newsList = []
+async function initializeFeed(){
 
-{
-title:"Nova IA impressiona usuários",
-summary:"Ferramenta viraliza e chama atenção do mercado de tecnologia.",
-url:"https://example.com"
-},
+    try{
 
-{
-title:"Roblox anuncia novidades",
-summary:"Novos recursos para criadores chegam em breve.",
-url:"https://example.com"
-},
+        feed.innerHTML = `
 
-{
-title:"Computadores retrô voltam à moda",
-summary:"Estética dos anos 2000 cresce nas redes sociais.",
-url:"https://example.com"
-},
+        <div class="news-card">
 
-{
-title:"Windows Vista inspira designers",
-summary:"Frutiger Aero continua popular entre desenvolvedores.",
-url:"https://example.com"
+            <h3>📡 Carregando notícias...</h3>
+
+            <p>
+                Buscando notícias mais recentes...
+            </p>
+
+        </div>
+
+        `;
+
+        newsList =
+        await loadRealNews();
+
+        renderFeed(newsList);
+
+        // ABRIR VIA NOTIFICAÇÃO
+
+        const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+        const title =
+        params.get("news");
+
+        if(title){
+
+            const found =
+            newsList.find(news =>
+
+                news.title === title
+
+            );
+
+            if(found){
+
+                openNews(found);
+
+            }
+
+        }
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        feed.innerHTML = `
+
+        <div class="news-card">
+
+            <h3>⚠️ Erro ao carregar</h3>
+
+            <p>
+                Não foi possível obter notícias.
+            </p>
+
+        </div>
+
+        `;
+
+    }
+
 }
-
-];
 
 
 // ==========================
@@ -81,62 +127,73 @@ url:"https://example.com"
 
 function renderFeed(newsArray){
 
-feed.innerHTML = "";
+    feed.innerHTML = "";
 
-if(newsArray.length === 0){
+    if(newsArray.length === 0){
 
-feed.innerHTML = `
-<div class="news-card">
-<h3>Nenhuma notícia encontrada</h3>
-<p>Tente outra pesquisa.</p>
-</div>
-`;
+        feed.innerHTML = `
 
-return;
+        <div class="news-card">
+
+            <h3>
+                Nenhuma notícia encontrada
+            </h3>
+
+            <p>
+                Tente outra pesquisa.
+            </p>
+
+        </div>
+
+        `;
+
+        return;
+
+    }
+
+    newsArray.forEach(news => {
+
+        const card =
+        document.createElement("div");
+
+        card.className =
+        "news-card";
+
+        card.innerHTML = `
+
+        <h3>
+            ${news.title}
+        </h3>
+
+        <p>
+            ${news.summary || "Sem resumo disponível."}
+        </p>
+
+        <button
+        class="primary-btn read-btn">
+
+            📖 Ler
+
+        </button>
+
+        `;
+
+        card
+        .querySelector(".read-btn")
+        .addEventListener(
+            "click",
+            () => {
+
+                openNews(news);
+
+            }
+        );
+
+        feed.appendChild(card);
+
+    });
 
 }
-
-newsArray.forEach(news => {
-
-const card =
-document.createElement("div");
-
-card.className =
-"news-card";
-
-card.innerHTML = `
-
-<h3>${news.title}</h3>
-
-<p>${news.summary}</p>
-
-<button
-class="primary-btn read-btn">
-
-📖 Ler
-
-</button>
-
-`;
-
-card
-.querySelector(".read-btn")
-.addEventListener(
-"click",
-() => {
-
-openNews(news);
-
-}
-);
-
-feed.appendChild(card);
-
-});
-
-}
-
-renderFeed(newsList);
 
 
 // ==========================
@@ -145,22 +202,26 @@ renderFeed(newsList);
 
 function openNews(news){
 
-currentNews = news;
+    currentNews = news;
 
-modalTitle.textContent =
-news.title;
+    modalTitle.textContent =
+    news.title;
 
-modalSummary.textContent =
-news.summary;
+    modalSummary.textContent =
+    news.summary ||
+    "Sem resumo disponível.";
 
-modalLink.href =
-news.url;
+    modalLink.href =
+    news.url;
 
-modal.classList.remove(
-"hidden"
-);
+    modalLink.target =
+    "_blank";
 
-saveToHistory(news);
+    modal.classList.remove(
+        "hidden"
+    );
+
+    saveToHistory(news);
 
 }
 
@@ -170,14 +231,14 @@ saveToHistory(news);
 // ==========================
 
 closeModal.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-modal.classList.add(
-"hidden"
-);
+        modal.classList.add(
+            "hidden"
+        );
 
-}
+    }
 );
 
 
@@ -187,42 +248,42 @@ modal.classList.add(
 
 function saveToHistory(news){
 
-let history =
+    let history =
 
-JSON.parse(
-localStorage.getItem(
-"pulseHistory"
-)
-) || [];
+    JSON.parse(
+        localStorage.getItem(
+            "pulseHistory"
+        )
+    ) || [];
 
-history.unshift({
+    history.unshift({
 
-title:
-news.title,
+        title:
+        news.title,
 
-summary:
-news.summary,
+        summary:
+        news.summary,
 
-url:
-news.url,
+        url:
+        news.url,
 
-date:
-new Date()
-.toLocaleString()
+        date:
+        new Date()
+        .toLocaleString()
 
-});
+    });
 
-history = history.slice(0,100);
+    history = history.slice(0,100);
 
-localStorage.setItem(
+    localStorage.setItem(
 
-"pulseHistory",
+        "pulseHistory",
 
-JSON.stringify(
-history
-)
+        JSON.stringify(
+            history
+        )
 
-);
+    );
 
 }
 
@@ -232,38 +293,38 @@ history
 // ==========================
 
 likeButton.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-if(!currentNews) return;
+        if(!currentNews) return;
 
-let likes =
+        let likes =
 
-JSON.parse(
-localStorage.getItem(
-"pulseLikes"
-)
-) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "pulseLikes"
+            )
+        ) || [];
 
-likes.push(
-currentNews.title
-);
+        likes.push(
+            currentNews.title
+        );
 
-localStorage.setItem(
+        localStorage.setItem(
 
-"pulseLikes",
+            "pulseLikes",
 
-JSON.stringify(
-likes
-)
+            JSON.stringify(
+                likes
+            )
 
-);
+        );
 
-alert(
-"👍 Preferência salva!"
-);
+        alert(
+            "👍 Preferência salva!"
+        );
 
-}
+    }
 );
 
 
@@ -272,38 +333,38 @@ alert(
 // ==========================
 
 dislikeButton.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-if(!currentNews) return;
+        if(!currentNews) return;
 
-let dislikes =
+        let dislikes =
 
-JSON.parse(
-localStorage.getItem(
-"pulseDislikes"
-)
-) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "pulseDislikes"
+            )
+        ) || [];
 
-dislikes.push(
-currentNews.title
-);
+        dislikes.push(
+            currentNews.title
+        );
 
-localStorage.setItem(
+        localStorage.setItem(
 
-"pulseDislikes",
+            "pulseDislikes",
 
-JSON.stringify(
-dislikes
-)
+            JSON.stringify(
+                dislikes
+            )
 
-);
+        );
 
-alert(
-"👎 Preferência salva!"
-);
+        alert(
+            "👎 Preferência salva!"
+        );
 
-}
+    }
 );
 
 
@@ -312,33 +373,33 @@ alert(
 // ==========================
 
 searchInput.addEventListener(
-"input",
-() => {
+    "input",
+    () => {
 
-const query =
+        const query =
 
-searchInput.value
-.toLowerCase();
+        searchInput.value
+        .toLowerCase();
 
-const filtered =
+        const filtered =
 
-newsList.filter(news =>
+        newsList.filter(news =>
 
-news.title
-.toLowerCase()
-.includes(query)
+            (news.title || "")
+            .toLowerCase()
+            .includes(query)
 
-||
+            ||
 
-news.summary
-.toLowerCase()
-.includes(query)
+            (news.summary || "")
+            .toLowerCase()
+            .includes(query)
 
-);
+        );
 
-renderFeed(filtered);
+        renderFeed(filtered);
 
-}
+    }
 );
 
 
@@ -347,45 +408,47 @@ renderFeed(filtered);
 // ==========================
 
 refreshButton.addEventListener(
-"click",
-() => {
+    "click",
+    async () => {
 
-renderFeed(newsList);
+        refreshButton.disabled = true;
 
-alert(
-"🔄 Feed atualizado!"
-);
+        refreshButton.textContent =
+        "⏳ Atualizando...";
 
-}
+        try{
+
+            newsList =
+            await loadRealNews();
+
+            renderFeed(newsList);
+
+            alert(
+                "🔄 Feed atualizado!"
+            );
+
+        }
+        catch(error){
+
+            console.error(error);
+
+            alert(
+                "Erro ao atualizar notícias."
+            );
+
+        }
+
+        refreshButton.disabled = false;
+
+        refreshButton.textContent =
+        "🔄 Atualizar";
+
+    }
 );
 
 
 // ==========================
-// ABRIR VIA NOTIFICAÇÃO
+// INICIAR
 // ==========================
 
-const params =
-new URLSearchParams(
-window.location.search
-);
-
-const title =
-params.get("news");
-
-if(title){
-
-const found =
-
-newsList.find(news =>
-
-news.title === title
-
-);
-
-if(found){
-
-openNews(found);
-
-}
-
-}
+initializeFeed();
