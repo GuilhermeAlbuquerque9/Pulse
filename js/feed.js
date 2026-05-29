@@ -3,6 +3,12 @@ import {
 }
 from "./news-loader.js";
 
+import {
+    saveLike,
+    saveDislike
+}
+from "../firebase/feedback.js";
+
 // ==========================
 // RETROPIXEL PULSE™
 // FEED.JS
@@ -69,8 +75,6 @@ async function initializeFeed(){
         await loadRealNews();
 
         renderFeed(newsList);
-
-        // ABRIR VIA NOTIFICAÇÃO
 
         const params =
         new URLSearchParams(
@@ -294,7 +298,7 @@ function saveToHistory(news){
 
 likeButton.addEventListener(
     "click",
-    () => {
+    async () => {
 
         if(!currentNews) return;
 
@@ -320,6 +324,29 @@ likeButton.addEventListener(
 
         );
 
+        try{
+
+            const uid =
+            localStorage.getItem(
+                "pulseUID"
+            );
+
+            if(uid){
+
+                await saveLike(
+                    uid,
+                    currentNews
+                );
+
+            }
+
+        }
+        catch(error){
+
+            console.error(error);
+
+        }
+
         alert(
             "👍 Preferência salva!"
         );
@@ -334,7 +361,7 @@ likeButton.addEventListener(
 
 dislikeButton.addEventListener(
     "click",
-    () => {
+    async () => {
 
         if(!currentNews) return;
 
@@ -359,6 +386,29 @@ dislikeButton.addEventListener(
             )
 
         );
+
+        try{
+
+            const uid =
+            localStorage.getItem(
+                "pulseUID"
+            );
+
+            if(uid){
+
+                await saveDislike(
+                    uid,
+                    currentNews
+                );
+
+            }
+
+        }
+        catch(error){
+
+            console.error(error);
+
+        }
 
         alert(
             "👎 Preferência salva!"
