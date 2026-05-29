@@ -1,3 +1,8 @@
+import {
+    loadRealNews
+}
+from "./news-loader.js";
+
 // ==========================
 // RETROPIXEL PULSE™
 // FEED.JS
