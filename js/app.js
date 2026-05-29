@@ -25,6 +25,44 @@ document.getElementById("notificationTime");
 
 
 // ==========================
+// REGISTRAR SERVICE WORKER
+// ==========================
+
+window.addEventListener(
+    "load",
+    async () => {
+
+        if ("serviceWorker" in navigator) {
+
+            try {
+
+                const registration =
+                await navigator.serviceWorker.register(
+                    "./firebase-messaging-sw.js"
+                );
+
+                console.log(
+                    "✅ Service Worker registrado!",
+                    registration
+                );
+
+            }
+            catch(error){
+
+                console.error(
+                    "❌ Erro ao registrar Service Worker:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+// ==========================
 // SELEÇÃO DE CHIPS
 // ==========================
 
@@ -82,13 +120,22 @@ notificationButton.addEventListener(
 
             notificationButton.disabled = true;
 
-            new Notification(
-                "Retropixel Pulse™",
-                {
-                    body:
-                    "Notificações ativadas com sucesso!"
-                }
-            );
+            try {
+
+                new Notification(
+                    "Retropixel Pulse™",
+                    {
+                        body:
+                        "Notificações ativadas com sucesso!"
+                    }
+                );
+
+            }
+            catch(error){
+
+                console.error(error);
+
+            }
 
         }else{
 
@@ -232,6 +279,10 @@ saveButton.addEventListener(
 
             notificationTime,
 
+            notificationsEnabled:
+            Notification.permission ===
+            "granted",
+
             createdAt:
             new Date().toISOString()
 
@@ -342,20 +393,20 @@ window.addEventListener(
 
         });
 
+        // STATUS DAS NOTIFICAÇÕES
+
+        if(
+            Notification.permission ===
+            "granted"
+        ){
+
+            notificationButton.textContent =
+            "✅ Notificações ativadas";
+
+            notificationButton.disabled =
+            true;
+
+        }
+
     }
 );
-
-if ("serviceWorker" in navigator) {
-
-  navigator.serviceWorker
-    .register("/firebase-messaging-sw.js")
-    .then(() => {
-
-      console.log(
-        "Service Worker registrado!"
-      );
-
-    })
-    .catch(console.error);
-
-}
