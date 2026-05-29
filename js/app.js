@@ -1,12 +1,12 @@
-// ==========================
-// RETROPIXEL PULSE™
-// APP.JS
-// ==========================
-
 import {
     registerFCM
 }
 from "../firebase/messaging.js";
+
+// ==========================
+// RETROPIXEL PULSE™
+// APP.JS
+// ==========================
 
 // ELEMENTOS
 
