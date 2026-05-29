@@ -21,19 +21,23 @@ export async function registerFCM(){
 
         const token =
 
-        await getToken(
+        const registration =
+await navigator.serviceWorker.register(
+    "./firebase-messaging-sw.js"
+);
 
-            messaging,
+const token =
 
-            {
+await getToken(
+    messaging,
+    {
+        vapidKey:
+        "BIKU2Wu0xdPmXc3BOUTliDYYmZtNo9HRKggA5vLgVHDn7WEc8ljC4QEu6jKXu0XfBzDNGAfQkNWoorpyOA9gerY",
 
-                vapidKey:
-                "BIKU2Wu0xdPmXc3BOUTliDYYmZtNo9HRKggA5vLgVHDn7WEc8ljC4QEu6jKXu0XfBzDNGAfQkNWoorpyOA9gerY"
-
-            }
-
-        );
-
+        serviceWorkerRegistration:
+        registration
+    }
+);
         if(token){
 
             console.log(
