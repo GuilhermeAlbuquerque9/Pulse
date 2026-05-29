@@ -2,58 +2,81 @@ import { app }
 from "./firebase-config.js";
 
 import {
-
-getFirestore,
-doc,
-setDoc,
-getDoc
-
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
 }
 from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const db =
 getFirestore(app);
 
-export async function savePreferences(
-uid,
-preferences
+export async function saveUserPreferences(
+    uid,
+    preferences
 ){
 
-await setDoc(
+    try{
 
-doc(
-db,
-"users",
-uid
-),
+        await setDoc(
 
-preferences
+            doc(
+                db,
+                "users",
+                uid
+            ),
 
-);
+            preferences
+
+        );
+
+        console.log(
+            "✅ Preferências salvas"
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+    }
 
 }
 
-export async function getPreferences(
-uid
+export async function loadUserPreferences(
+    uid
 ){
 
-const snapshot =
-await getDoc(
+    try{
 
-doc(
-db,
-"users",
-uid
-)
+        const snapshot =
 
-);
+        await getDoc(
 
-if(snapshot.exists()){
+            doc(
+                db,
+                "users",
+                uid
+            )
 
-return snapshot.data();
+        );
 
-}
+        if(snapshot.exists()){
 
-return null;
+            return snapshot.data();
+
+        }
+
+        return null;
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        return null;
+
+    }
 
 }
