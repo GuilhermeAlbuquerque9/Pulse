@@ -124,6 +124,7 @@ notificationButton.addEventListener(
             "✅ Notificações ativadas";
 
             notificationButton.disabled = true;
+            await registerFCM();
 
             try {
 
