@@ -36,12 +36,26 @@ document.getElementById("notificationTime");
 
 
 // ==========================
-// REGISTRAR SERVICE WORKER
+// INICIALIZAÇÃO
 // ==========================
 
 window.addEventListener(
     "load",
     async () => {
+
+        try{
+
+            await initializeUser();
+
+        }
+        catch(error){
+
+            console.error(
+                "Erro ao inicializar usuário:",
+                error
+            );
+
+        }
 
         if ("serviceWorker" in navigator) {
 
@@ -69,6 +83,8 @@ window.addEventListener(
 
         }
 
+        loadPreferences();
+
     }
 );
 
@@ -79,11 +95,16 @@ window.addEventListener(
 
 chips.forEach(chip => {
 
-    chip.addEventListener("click", () => {
+    chip.addEventListener(
+        "click",
+        () => {
 
-        chip.classList.toggle("selected");
+            chip.classList.toggle(
+                "selected"
+            );
 
-    });
+        }
+    );
 
 });
 
@@ -94,11 +115,16 @@ chips.forEach(chip => {
 
 days.forEach(day => {
 
-    day.addEventListener("click", () => {
+    day.addEventListener(
+        "click",
+        () => {
 
-        day.classList.toggle("selected");
+            day.classList.toggle(
+                "selected"
+            );
 
-    });
+        }
+    );
 
 });
 
@@ -129,8 +155,21 @@ notificationButton.addEventListener(
             notificationButton.textContent =
             "✅ Notificações ativadas";
 
-            notificationButton.disabled = true;
-            await registerFCM();
+            notificationButton.disabled =
+            true;
+
+            try{
+
+                await registerFCM();
+
+            }
+            catch(error){
+
+                console.error(
+                    error
+                );
+
+            }
 
             try {
 
@@ -145,11 +184,14 @@ notificationButton.addEventListener(
             }
             catch(error){
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
             }
 
-        }else{
+        }
+        else{
 
             alert(
                 "Permissão negada."
@@ -167,13 +209,11 @@ notificationButton.addEventListener(
 
 saveButton.addEventListener(
     "click",
-    () => {
+    async () => {
 
         const selectedThemes = [];
         const selectedSources = [];
         const selectedDays = [];
-
-        // FONTES CONHECIDAS
 
         const sourceNames = [
 
@@ -189,8 +229,6 @@ saveButton.addEventListener(
 
         ];
 
-        // CHIPS
-
         document
         .querySelectorAll(".chip.selected")
         .forEach(chip => {
@@ -198,19 +236,26 @@ saveButton.addEventListener(
             const text =
             chip.textContent.trim();
 
-            if(sourceNames.includes(text)){
+            if(
+                sourceNames.includes(
+                    text
+                )
+            ){
 
-                selectedSources.push(text);
+                selectedSources.push(
+                    text
+                );
 
-            }else{
+            }
+            else{
 
-                selectedThemes.push(text);
+                selectedThemes.push(
+                    text
+                );
 
             }
 
         });
-
-        // DIAS
 
         document
         .querySelectorAll(".day.selected")
@@ -222,19 +267,17 @@ saveButton.addEventListener(
 
         });
 
-        // IDIOMA
-
         const language =
         languageSelect.value;
-
-        // HORÁRIO
 
         const notificationTime =
         timeInput.value;
 
         // VALIDAÇÕES
 
-        if(selectedThemes.length === 0){
+        if(
+            selectedThemes.length === 0
+        ){
 
             alert(
                 "Escolha pelo menos um tema."
@@ -244,7 +287,9 @@ saveButton.addEventListener(
 
         }
 
-        if(selectedSources.length === 0){
+        if(
+            selectedSources.length === 0
+        ){
 
             alert(
                 "Escolha pelo menos uma fonte."
@@ -254,7 +299,9 @@ saveButton.addEventListener(
 
         }
 
-        if(selectedDays.length === 0){
+        if(
+            selectedDays.length === 0
+        ){
 
             alert(
                 "Escolha pelo menos um dia."
@@ -264,7 +311,9 @@ saveButton.addEventListener(
 
         }
 
-        if(notificationTime === ""){
+        if(
+            notificationTime === ""
+        ){
 
             alert(
                 "Escolha um horário."
@@ -273,8 +322,6 @@ saveButton.addEventListener(
             return;
 
         }
-
-        // OBJETO
 
         const preferences = {
 
@@ -296,18 +343,44 @@ saveButton.addEventListener(
             "granted",
 
             createdAt:
-            new Date().toISOString()
+            new Date()
+            .toISOString()
 
         };
 
         // LOCAL STORAGE
 
         localStorage.setItem(
+
             "retropixelPulsePreferences",
+
             JSON.stringify(
                 preferences
             )
+
         );
+
+        // FIRESTORE
+
+        try{
+
+            await savePreferencesToCloud(
+                preferences
+            );
+
+            console.log(
+                "✅ Preferências salvas na nuvem"
+            );
+
+        }
+        catch(error){
+
+            console.error(
+                "Erro ao salvar no Firestore:",
+                error
+            );
+
+        }
 
         console.log(
             "Preferências:",
@@ -317,8 +390,6 @@ saveButton.addEventListener(
         alert(
             "Preferências salvas!"
         );
-
-        // FEED
 
         window.location.href =
         "feed.html";
@@ -331,94 +402,94 @@ saveButton.addEventListener(
 // CARREGAR PREFERÊNCIAS
 // ==========================
 
-window.addEventListener(
-    "load",
-    () => {
+function loadPreferences(){
 
-        const saved =
-        localStorage.getItem(
-            "retropixelPulsePreferences"
-        );
+    const saved =
 
-        if(!saved) return;
+    localStorage.getItem(
+        "retropixelPulsePreferences"
+    );
 
-        const preferences =
-        JSON.parse(saved);
+    if(!saved){
 
-        // IDIOMA
+        return;
 
-        languageSelect.value =
-        preferences.language;
+    }
 
-        // HORÁRIO
+    const preferences =
+    JSON.parse(saved);
 
-        timeInput.value =
-        preferences.notificationTime;
+    languageSelect.value =
+    preferences.language;
 
-        // TEMAS + FONTES
+    timeInput.value =
+    preferences.notificationTime;
 
-        document
-        .querySelectorAll(".chip")
-        .forEach(chip => {
+    document
+    .querySelectorAll(".chip")
+    .forEach(chip => {
 
-            const text =
-            chip.textContent.trim();
-
-            if(
-
-                preferences.themes.includes(text)
-
-                ||
-
-                preferences.sources.includes(text)
-
-            ){
-
-                chip.classList.add(
-                    "selected"
-                );
-
-            }
-
-        });
-
-        // DIAS
-
-        document
-        .querySelectorAll(".day")
-        .forEach(day => {
-
-            const text =
-            day.textContent.trim();
-
-            if(
-
-                preferences.days.includes(text)
-
-            ){
-
-                day.classList.add(
-                    "selected"
-                );
-
-            }
-
-        });
-
-        // STATUS DAS NOTIFICAÇÕES
+        const text =
+        chip.textContent.trim();
 
         if(
-            Notification.permission ===
-            "granted"
+
+            preferences.themes.includes(
+                text
+            )
+
+            ||
+
+            preferences.sources.includes(
+                text
+            )
+
         ){
 
-            notificationButton.textContent =
-            "✅ Notificações ativadas";
-
-            notificationButton.disabled =
-            true;
+            chip.classList.add(
+                "selected"
+            );
 
         }
 
+    });
+
+    document
+    .querySelectorAll(".day")
+    .forEach(day => {
+
+        const text =
+        day.textContent.trim();
+
+        if(
+
+            preferences.days.includes(
+                text
+            )
+
+        ){
+
+            day.classList.add(
+                "selected"
+            );
+
+        }
+
+    });
+
+    if(
+
+        Notification.permission ===
+        "granted"
+
+    ){
+
+        notificationButton.textContent =
+        "✅ Notificações ativadas";
+
+        notificationButton.disabled =
+        true;
+
     }
-);
+
+}
