@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Feed - Retropixel Pulse™</title>
+
+<link rel="icon" type="image/png" href="assets/Pulse_icon.png">
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<div class="background"></div>
+
+<header class="topbar">
+
+    <div class="logo-area">
+
+        <img
+        src="assets/Pulse_logo.png"
+        alt="Retropixel Pulse"
+        class="logo">
+
+        <div>
+            <h1>Retropixel Pulse™</h1>
+            <p>Seu feed personalizado.</p>
+        </div>
+
+    </div>
+
+    <nav class="navbar">
+
+        <a href="feed.html">📰 Feed</a>
+
+        <a href="history.html">
+            🕘 Histórico
+        </a>
+
+        <a href="settings.html">
+            ⚙️ Configurações
+        </a>
+
+    </nav>
+
+</header>
+
+<main class="feed-container">
+
+    <!-- TOPO -->
+
+    <section class="feed-header">
+
+        <h2>📰 Últimas Notícias</h2>
+
+        <div class="feed-actions">
+
+            <input
+            type="search"
+            id="searchInput"
+            placeholder="Pesquisar notícia...">
+
+            <button
+            id="refreshFeed"
+            class="primary-btn">
+
+                🔄 Atualizar
+
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- FEED -->
+
+    <section
+    id="newsFeed"
+    class="news-grid">
+
+    </section>
+
+</main>
+
+<!-- MODAL -->
+
+<div
+id="newsModal"
+class="modal hidden">
+
+    <div class="modal-card">
+
+        <button
+        id="closeModal"
+        class="close-btn">
+
+            ✖
+
+        </button>
+
+        <h2 id="modalTitle"></h2>
+
+        <p id="modalSummary"></p>
+
+        <a
+        id="modalLink"
+        href="#"
+        target="_blank">
+
+            🔗 Ler notícia completa
+
+        </a>
+
+        <div class="reaction-buttons">
+
+            <button
+            id="likeButton"
+            class="like-btn">
+
+                👍 Gostei
+
+            </button>
+
+            <button
+            id="dislikeButton"
+            class="dislike-btn">
+
+                👎 Não gostei
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="module" src="firebase/firebase-config.js"></script>
+<script src="js/feed.js"></script>
+
+</body>
+</html>

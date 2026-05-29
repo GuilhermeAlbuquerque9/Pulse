@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Retropixel Pulse™</title>
+
+<link rel="icon" type="image/png" href="assets/Pulse_icon.png">
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<div class="background"></div>
+
+<header class="topbar">
+
+    <div class="logo-area">
+
+        <img
+        src="assets/Pulse_logo.png"
+        alt="Retropixel Pulse"
+        class="logo">
+
+        <div>
+            <h1>Retropixel Pulse™</h1>
+            <p>Notícias rápidas para você.</p>
+        </div>
+
+    </div>
+
+</header>
+
+<main class="setup-container">
+
+    <div class="setup-card">
+
+        <h2>🌎 Configuração Inicial</h2>
+
+        <p class="description">
+            Escolha suas preferências para receber notícias personalizadas.
+        </p>
+
+        <!-- IDIOMA -->
+
+        <section>
+
+            <h3>Idioma</h3>
+
+            <select id="language">
+
+                <option value="pt-BR">
+                    Português
+                </option>
+
+                <option value="en-US">
+                    English
+                </option>
+
+                <option value="es-ES">
+                    Español
+                </option>
+
+            </select>
+
+        </section>
+
+        <!-- TEMAS -->
+
+        <section>
+
+            <h3>Temas</h3>
+
+            <div class="chips">
+
+                <button class="chip">Tecnologia</button>
+                <button class="chip">IA</button>
+                <button class="chip">Games</button>
+                <button class="chip">Roblox</button>
+                <button class="chip">Programação</button>
+                <button class="chip">Ciência</button>
+                <button class="chip">Espaço</button>
+                <button class="chip">Filmes</button>
+                <button class="chip">Séries</button>
+                <button class="chip">Música</button>
+                <button class="chip">Esportes</button>
+                <button class="chip">Economia</button>
+                <button class="chip">Política</button>
+                <button class="chip">Segurança Digital</button>
+                <button class="chip">Retro Tech</button>
+
+            </div>
+
+        </section>
+
+        <!-- FONTES -->
+
+        <section>
+
+            <h3>Fontes</h3>
+
+            <div class="chips">
+
+                <button class="chip">BBC</button>
+                <button class="chip">CNN</button>
+                <button class="chip">Reuters</button>
+                <button class="chip">TechCrunch</button>
+                <button class="chip">The Verge</button>
+                <button class="chip">IGN</button>
+                <button class="chip">Polygon</button>
+                <button class="chip">g1</button>
+                <button class="chip">Olhar Digital</button>
+
+            </div>
+
+        </section>
+
+        <!-- DIAS -->
+
+        <section>
+
+            <h3>Dias da Semana</h3>
+
+            <div class="chips">
+
+                <button class="day">Seg</button>
+                <button class="day">Ter</button>
+                <button class="day">Qua</button>
+                <button class="day">Qui</button>
+                <button class="day">Sex</button>
+                <button class="day">Sáb</button>
+                <button class="day">Dom</button>
+
+            </div>
+
+        </section>
+
+        <!-- HORÁRIOS -->
+
+        <section>
+
+            <h3>Horário das Notificações</h3>
+
+            <input
+            type="time"
+            id="notificationTime">
+
+        </section>
+
+        <!-- NOTIFICAÇÕES -->
+
+        <section>
+
+            <h3>Permissões</h3>
+
+            <button
+            id="enableNotifications"
+            class="primary-btn">
+
+                🔔 Ativar Notificações
+
+            </button>
+
+        </section>
+
+        <!-- FINALIZAR -->
+
+        <button
+        id="savePreferences"
+        class="continue-btn">
+
+            🚀 Entrar no Retropixel Pulse
+
+        </button>
+
+    </div>
+
+</main>
+
+<script type="module" src="firebase/firebase-config.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
