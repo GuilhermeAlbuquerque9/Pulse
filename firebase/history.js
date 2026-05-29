@@ -53,9 +53,7 @@ export async function saveHistoryItem(
     }
     catch(error){
 
-        console.error(
-            error
-        );
+        console.error(error);
 
     }
 
