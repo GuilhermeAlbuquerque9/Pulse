@@ -19,25 +19,36 @@ export async function registerFCM(){
 
     try{
 
+        const registration =
+
+        await navigator
+        .serviceWorker
+        .register(
+            "./firebase-messaging-sw.js"
+        );
+
+        console.log(
+            "✅ Service Worker FCM registrado"
+        );
+
         const token =
 
-        const registration =
-await navigator.serviceWorker.register(
-    "./firebase-messaging-sw.js"
-);
+        await getToken(
 
-const token =
+            messaging,
 
-await getToken(
-    messaging,
-    {
-        vapidKey:
-        "BIKU2Wu0xdPmXc3BOUTliDYYmZtNo9HRKggA5vLgVHDn7WEc8ljC4QEu6jKXu0XfBzDNGAfQkNWoorpyOA9gerY",
+            {
 
-        serviceWorkerRegistration:
-        registration
-    }
-);
+                vapidKey:
+                "BIKU2Wu0xdPmXc3BOUTliDYYmZtNo9HRKggA5vLgVHDn7WEc8ljC4QEu6jKXu0XfBzDNGAfQkNWoorpyOA9gerY",
+
+                serviceWorkerRegistration:
+                registration
+
+            }
+
+        );
+
         if(token){
 
             console.log(
@@ -69,6 +80,10 @@ await getToken(
                     token
                 );
 
+                console.log(
+                    "🔔 Token salvo"
+                );
+
             }
 
             return token;
@@ -79,6 +94,8 @@ await getToken(
             "Nenhum token gerado."
         );
 
+        return null;
+
     }
     catch(error){
 
@@ -86,6 +103,8 @@ await getToken(
             "Erro FCM:",
             error
         );
+
+        return null;
 
     }
 
