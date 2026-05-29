@@ -3,6 +3,12 @@ import {
 }
 from "../firebase/messaging.js";
 
+import {
+    initializeUser,
+    savePreferencesToCloud
+}
+from "../firebase/user.js";
+
 // ==========================
 // RETROPIXEL PULSE™
 // APP.JS
