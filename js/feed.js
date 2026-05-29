@@ -9,6 +9,11 @@ import {
 }
 from "../firebase/feedback.js";
 
+import {
+    saveHistoryItem
+}
+from "../firebase/history.js";
+
 // ==========================
 // RETROPIXEL PULSE™
 // FEED.JS
@@ -250,7 +255,7 @@ closeModal.addEventListener(
 // HISTÓRICO
 // ==========================
 
-function saveToHistory(news){
+async function saveToHistory(news){
 
     let history =
 
@@ -288,6 +293,29 @@ function saveToHistory(news){
         )
 
     );
+
+    try{
+
+        const uid =
+        localStorage.getItem(
+            "pulseUID"
+        );
+
+        if(uid){
+
+            await saveHistoryItem(
+                uid,
+                news
+            );
+
+        }
+
+    }
+    catch(error){
+
+        console.error(error);
+
+    }
 
 }
 
