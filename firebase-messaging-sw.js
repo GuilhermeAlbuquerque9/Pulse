@@ -16,3 +16,7 @@ firebase.initializeApp({
 });
 
 firebase.messaging();
+
+console.log(
+  "Firebase Messaging SW iniciado!"
+);
