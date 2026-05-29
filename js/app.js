@@ -3,6 +3,11 @@
 // APP.JS
 // ==========================
 
+import {
+    registerFCM
+}
+from "../firebase/messaging.js";
+
 // ELEMENTOS
 
 const chips =
