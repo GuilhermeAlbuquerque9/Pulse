@@ -46,7 +46,7 @@ let currentNews = null;
 // (será trocado pelo Firebase)
 // ==========================
 
-let newsList = [
+let newsList = []
 
 {
 title:"Nova IA impressiona usuários",
