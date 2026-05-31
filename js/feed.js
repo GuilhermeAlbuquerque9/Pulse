@@ -163,42 +163,117 @@ function renderFeed(newsArray){
     newsArray.forEach(news => {
 
         const card =
-        document.createElement("div");
+document.createElement("div");
 
-        card.className =
-        "news-card";
+card.className =
+"news-card";
 
-        card.innerHTML = `
+card.innerHTML = `
 
-        <h3>
-            ${news.title}
-        </h3>
+<h3>
+    ${news.title}
+</h3>
 
-        <p>
-            ${news.summary || "Sem resumo disponível."}
-        </p>
+<p>
+    ${news.summary || "Sem resumo disponível."}
+</p>
 
-        <button
-        class="primary-btn read-btn">
+<div class="news-actions">
 
-            📖 Ler
+    <button
+    class="primary-btn read-btn">
 
-        </button>
+        📖 Ler
 
-        `;
+    </button>
 
-        card
-        .querySelector(".read-btn")
-        .addEventListener(
-            "click",
-            () => {
+    <button
+    class="remove-btn">
 
-                openNews(news);
+        ❌
 
-            }
+    </button>
+
+</div>
+
+`;
+
+card
+.querySelector(".read-btn")
+.addEventListener(
+    "click",
+    () => {
+
+        openNews(news);
+
+    }
+);
+
+card
+.querySelector(".remove-btn")
+.addEventListener(
+    "click",
+    async () => {
+
+        newsList =
+        newsList.filter(
+            item =>
+            item.url !== news.url
         );
 
-        feed.appendChild(card);
+        renderFeed(newsList);
+
+        let dislikes =
+
+        JSON.parse(
+            localStorage.getItem(
+                "pulseDislikes"
+            )
+        ) || [];
+
+        dislikes.push(
+            news.title
+        );
+
+        localStorage.setItem(
+
+            "pulseDislikes",
+
+            JSON.stringify(
+                dislikes
+            )
+
+        );
+
+        try{
+
+            const uid =
+            localStorage.getItem(
+                "pulseUID"
+            );
+
+            if(uid){
+
+                await saveDislike(
+                    uid,
+                    news
+                );
+
+            }
+
+        }
+        catch(error){
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+);
+
+feed.appendChild(card);
 
     });
 
