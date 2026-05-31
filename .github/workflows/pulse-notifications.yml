@@ -1,7 +1,11 @@
 name: Pulse Notifications
 
 on:
+
   workflow_dispatch:
+
+  schedule:
+    - cron: "* * * * *"
 
 jobs:
 
