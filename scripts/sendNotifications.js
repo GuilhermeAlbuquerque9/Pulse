@@ -52,12 +52,15 @@ async function sendNotifications(){
         }
     );
 
+    const notificationStamp =
+    `${currentDay}-${currentTime}`;
+
     console.log(
-        `📅 Dia: ${currentDay}`
+        `📅 ${currentDay}`
     );
 
     console.log(
-        `⏰ Hora: ${currentTime}`
+        `⏰ ${currentTime}`
     );
 
     const usersSnapshot =
@@ -83,6 +86,9 @@ async function sendNotifications(){
 
         const notificationsEnabled =
         user.notificationsEnabled;
+
+        const lastNotificationSent =
+        user.lastNotificationSent || "";
 
         if(
             !notificationsEnabled
@@ -111,9 +117,18 @@ async function sendNotifications(){
 
         }
 
-        console.log(
-            `🔔 Enviando para ${uid}`
-        );
+        if(
+            lastNotificationSent ===
+            notificationStamp
+        ){
+
+            console.log(
+                `⏭️ Já enviado para ${uid}`
+            );
+
+            continue;
+
+        }
 
         const tokenSnapshot =
         await db
@@ -124,6 +139,17 @@ async function sendNotifications(){
             uid
         )
         .get();
+
+        if(
+            tokenSnapshot.empty
+        ){
+
+            continue;
+
+        }
+
+        let delivered =
+        false;
 
         for(
             const tokenDoc
@@ -159,21 +185,37 @@ async function sendNotifications(){
 
                 });
 
+                delivered = true;
+
                 sentCount++;
 
                 console.log(
-                    `✅ Notificação enviada`
+                    `✅ Enviado para ${uid}`
                 );
 
             }
             catch(error){
 
                 console.error(
-                    "❌ Erro:",
+                    `❌ ${uid}:`,
                     error.message
                 );
 
             }
+
+        }
+
+        if(delivered){
+
+            await db
+            .collection("users")
+            .doc(uid)
+            .update({
+
+                lastNotificationSent:
+                notificationStamp
+
+            });
 
         }
 
