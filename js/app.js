@@ -34,6 +34,9 @@ document.getElementById("language");
 const timeInput =
 document.getElementById("notificationTime");
 
+const usernameInput =
+document.getElementById("username");
+
 
 // ==========================
 // INICIALIZAÇÃO
@@ -211,6 +214,24 @@ saveButton.addEventListener(
     "click",
     async () => {
 
+        const username =
+        usernameInput.value.trim();
+
+        if(username === ""){
+
+            alert(
+                "Escolha um nome de usuário."
+            );
+
+            return;
+
+        }
+
+        localStorage.setItem(
+            "pulseUsername",
+            username
+        );
+
         const selectedThemes = [];
         const selectedSources = [];
         const selectedDays = [];
@@ -273,8 +294,6 @@ saveButton.addEventListener(
         const notificationTime =
         timeInput.value;
 
-        // VALIDAÇÕES
-
         if(
             selectedThemes.length === 0
         ){
@@ -325,6 +344,8 @@ saveButton.addEventListener(
 
         const preferences = {
 
+            username,
+
             language,
 
             themes:
@@ -348,8 +369,6 @@ saveButton.addEventListener(
 
         };
 
-        // LOCAL STORAGE
-
         localStorage.setItem(
 
             "retropixelPulsePreferences",
@@ -359,8 +378,6 @@ saveButton.addEventListener(
             )
 
         );
-
-        // FIRESTORE
 
         try{
 
@@ -382,11 +399,6 @@ saveButton.addEventListener(
 
         }
 
-        console.log(
-            "Preferências:",
-            preferences
-        );
-
         alert(
             "Preferências salvas!"
         );
@@ -403,6 +415,22 @@ saveButton.addEventListener(
 // ==========================
 
 function loadPreferences(){
+
+    const username =
+
+    localStorage.getItem(
+        "pulseUsername"
+    );
+
+    if(
+        username &&
+        usernameInput
+    ){
+
+        usernameInput.value =
+        username;
+
+    }
 
     const saved =
 
