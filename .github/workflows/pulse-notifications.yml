@@ -1,26 +1,104 @@
-name: Pulse Notifications
+import admin from "firebase-admin";
 
-on:
-  workflow_dispatch:
+const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT
+);
 
-jobs:
+admin.initializeApp({
 
-  notify:
+    credential:
+    admin.credential.cert(
+        serviceAccount
+    )
 
-    runs-on: ubuntu-latest
+});
 
-    steps:
+const db =
+admin.firestore();
 
-      - name: Checkout
-        uses: actions/checkout@v4
+async function sendNotifications(){
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+    console.log(
+        "🚀 Iniciando envio..."
+    );
 
-      - name: Install dependencies
-        run: npm install
+    const snapshot =
+    await db
+    .collection("tokens")
+    .get();
 
-      - name: Run notification script
-        run: node scripts/sendNotifications.js
+    if(snapshot.empty){
+
+        console.log(
+            "⚠️ Nenhum token encontrado."
+        );
+
+        return;
+
+    }
+
+    let success = 0;
+    let failed = 0;
+
+    for(const doc of snapshot.docs){
+
+        const data =
+        doc.data();
+
+        const token =
+        data.token;
+
+        if(!token){
+
+            continue;
+
+        }
+
+        try{
+
+            await admin
+            .messaging()
+            .send({
+
+                token,
+
+                notification: {
+
+                    title:
+                    "🔔 Pulse",
+
+                    body:
+                    "Você tem uma nova notícia! Abra o Pulse para conferir."
+
+                }
+
+            });
+
+            success++;
+
+            console.log(
+                `✅ Enviado para ${data.uid}`
+            );
+
+        }
+        catch(error){
+
+            failed++;
+
+            console.error(
+                `❌ Erro em ${data.uid}:`,
+                error.message
+            );
+
+        }
+
+    }
+
+    console.log(
+        `🎉 Concluído. Sucesso: ${success} | Falhas: ${failed}`
+    );
+
+}
+
+sendNotifications()
+.catch(console.error);
