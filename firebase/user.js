@@ -57,9 +57,24 @@ export async function savePreferencesToCloud(
 
     }
 
+    const username =
+    localStorage.getItem(
+        "pulseUsername"
+    );
+
+    const data = {
+
+        uid,
+
+        username,
+
+        ...preferences
+
+    };
+
     await saveUserPreferences(
         uid,
-        preferences
+        data
     );
 
 }
