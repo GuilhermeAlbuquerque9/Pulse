@@ -1,3 +1,8 @@
+import {
+    deleteAccountData
+}
+from "../firebase/firestore.js";
+
 const saveButton =
 document.getElementById(
 "saveSettings"
@@ -23,6 +28,11 @@ document.getElementById(
 "resetPreferences"
 );
 
+const deleteAccount =
+document.getElementById(
+"deleteAccount"
+);
+
 const enableNotifications =
 document.getElementById(
 "enableNotifications"
@@ -32,9 +42,6 @@ const disableNotifications =
 document.getElementById(
 "disableNotifications"
 );
-
-
-// CARREGAR
 
 const preferences =
 
@@ -53,9 +60,6 @@ notificationTime.value =
 preferences.notificationTime;
 
 }
-
-
-// SALVAR
 
 saveButton.addEventListener(
 "click",
@@ -86,9 +90,6 @@ alert(
 }
 );
 
-
-// LIMPAR HISTÓRICO
-
 clearHistory.addEventListener(
 "click",
 () => {
@@ -112,9 +113,6 @@ alert(
 }
 );
 
-
-// RESETAR
-
 resetPreferences.addEventListener(
 "click",
 () => {
@@ -125,21 +123,7 @@ confirm(
 )
 ){
 
-localStorage.removeItem(
-"retropixelPulsePreferences"
-);
-
-localStorage.removeItem(
-"pulseHistory"
-);
-
-localStorage.removeItem(
-"pulseLikes"
-);
-
-localStorage.removeItem(
-"pulseDislikes"
-);
+localStorage.clear();
 
 window.location.href =
 "index.html";
@@ -149,8 +133,59 @@ window.location.href =
 }
 );
 
+deleteAccount.addEventListener(
+"click",
+async () => {
 
-// NOTIFICAÇÕES
+const confirmation =
+confirm(
+"Excluir sua conta permanentemente?"
+);
+
+if(!confirmation){
+
+return;
+
+}
+
+try{
+
+const uid =
+
+localStorage.getItem(
+"pulseUID"
+);
+
+if(uid){
+
+await deleteAccountData(
+uid
+);
+
+}
+
+localStorage.clear();
+
+alert(
+"Conta excluída."
+);
+
+window.location.href =
+"index.html";
+
+}
+catch(error){
+
+console.error(error);
+
+alert(
+"Erro ao excluir conta."
+);
+
+}
+
+}
+);
 
 enableNotifications
 .addEventListener(
@@ -182,7 +217,7 @@ disableNotifications
 () => {
 
 alert(
-"Para bloquear notificações, use as permissões do navegador."
+"Use as permissões do navegador para bloquear notificações."
 );
 
 }
