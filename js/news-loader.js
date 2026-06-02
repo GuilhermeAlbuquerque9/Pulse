@@ -1,140 +1,113 @@
-// ==========================
-// RETROPIXEL PULSE™
-// RSS.JS
-// ==========================
-
-// FEEDS RSS
-
-const RSS_FEEDS = {
-
-    techcrunch:
-    "https://techcrunch.com/feed/",
-
-    verge:
-    "https://www.theverge.com/rss/index.xml",
-
-    polygon:
-    "https://www.polygon.com/rss/index.xml",
-
-    reuters:
-    "https://feeds.reuters.com/reuters/technologyNews",
-
-    bbc:
-    "https://feeds.bbci.co.uk/news/technology/rss.xml"
-
-};
-
-
-// ==========================
-// CONVERSOR RSS → JSON
-// ==========================
-
-const RSS_TO_JSON =
-
-"https://api.rss2json.com/v1/api.json?rss_url=";
-
-
-// ==========================
-// BUSCAR UM FEED
-// ==========================
-
-export async function fetchRSSFeed(url){
-
-    try{
-
-        const response =
-        await fetch(
-
-            RSS_TO_JSON +
-            encodeURIComponent(url)
-
-        );
-
-        const data =
-        await response.json();
-
-        return data.items || [];
-
-    }
-    catch(error){
-
-        console.error(
-            "Erro RSS:",
-            error
-        );
-
-        return [];
-
-    }
-
+import {
+    fetchAllRSS
 }
+from "./rss.js";
 
+export async function loadRealNews(){
 
-// ==========================
-// BUSCAR TODOS OS FEEDS
-// ==========================
+    const preferences =
 
-export async function fetchAllRSS(selectedSources = []){
+    JSON.parse(
 
-    let allNews = [];
+        localStorage.getItem(
+            "retropixelPulsePreferences"
+        )
 
-    const sourceMap = {
+    ) || {};
 
-        "TechCrunch":
-        RSS_FEEDS.techcrunch,
+    const selectedSources =
 
-        "The Verge":
-        RSS_FEEDS.verge,
+    preferences.sources || [];
 
-        "Polygon":
-        RSS_FEEDS.polygon,
+    const rssItems =
 
-        "Reuters":
-        RSS_FEEDS.reuters,
+    await fetchAllRSS(
+        selectedSources
+    );
 
-        "BBC":
-        RSS_FEEDS.bbc
+    const sourceMap = {};
 
-    };
+    rssItems.forEach(item => {
 
-    const feedsToLoad =
+        const source =
+        item.source ||
+        "Desconhecida";
 
-    selectedSources.length > 0
+        if(
+            !sourceMap[source]
+        ){
 
-    ? selectedSources
-
-    : Object.keys(sourceMap);
-
-    for(const source of feedsToLoad){
-
-        const feedUrl =
-        sourceMap[source];
-
-        if(!feedUrl){
-
-            continue;
+            sourceMap[source] = [];
 
         }
 
-        const news =
-        await fetchRSSFeed(
-            feedUrl +
-            "?t=" +
-            Date.now()
-        );
+        if(
+            sourceMap[source]
+            .length < 3
+        ){
 
-        news.forEach(item => {
+            sourceMap[source]
+            .push(item);
 
-            item.source =
-            source;
+        }
 
-        });
+    });
 
-        allNews =
-        allNews.concat(news);
+    const filteredNews =
 
-    }
+    Object.values(
+        sourceMap
+    ).flat();
 
-    return allNews;
+    filteredNews.sort(
+        (a,b) =>
+
+        new Date(
+            b.pubDate || 0
+        )
+
+        -
+
+        new Date(
+            a.pubDate || 0
+        )
+    );
+
+    return filteredNews.map(item => ({
+
+        title:
+        item.title,
+
+        summary:
+
+        item.description
+
+        ?.replace(
+            /<[^>]*>/g,
+            ""
+        )
+
+        ?.substring(
+            0,
+            300
+        )
+
+        ||
+
+        "Sem resumo disponível.",
+
+        url:
+        item.link,
+
+        date:
+        item.pubDate,
+
+        image:
+        item.thumbnail || "",
+
+        source:
+        item.source
+
+    }));
 
 }
