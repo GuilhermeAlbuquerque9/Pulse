@@ -5,7 +5,8 @@ from "../firebase/messaging.js";
 
 import {
     initializeUser,
-    savePreferencesToCloud
+    savePreferencesToCloud,
+    isUsernameAvailable
 }
 from "../firebase/user.js";
 
@@ -216,6 +217,21 @@ saveButton.addEventListener(
 
         const username =
         usernameInput.value.trim();
+
+const available =
+await isUsernameAvailable(
+    username
+);
+
+if(!available){
+
+    alert(
+        "Este nome de usuário já está em uso."
+    );
+
+    return;
+
+}
 
         if(username === ""){
 
