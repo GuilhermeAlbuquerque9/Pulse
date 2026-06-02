@@ -4,97 +4,302 @@ import {
 from "../firebase/messaging.js";
 
 import {
-    initializeUser,
+    registerUser,
+    loginUser,
+    watchAuthState
+}
+from "../firebase/auth.js";
+
+import {
     savePreferencesToCloud,
-    isUsernameAvailable
+    isUsernameAvailable,
+    loadPreferencesFromCloud
 }
 from "../firebase/user.js";
 
+
 // ==========================
-// RETROPIXEL PULSE™
-// APP.JS
+// LOGIN
 // ==========================
 
-// ELEMENTOS
+const authSection =
+document.getElementById(
+    "authSection"
+);
+
+const preferencesSection =
+document.getElementById(
+    "preferencesSection"
+);
+
+const emailInput =
+document.getElementById(
+    "email"
+);
+
+const passwordInput =
+document.getElementById(
+    "password"
+);
+
+const confirmPasswordInput =
+document.getElementById(
+    "confirmPassword"
+);
+
+const registerButton =
+document.getElementById(
+    "registerButton"
+);
+
+const loginButton =
+document.getElementById(
+    "loginButton"
+);
+
+
+// ==========================
+// PREFERÊNCIAS
+// ==========================
 
 const chips =
-document.querySelectorAll(".chip");
+document.querySelectorAll(
+    ".chip"
+);
 
 const days =
-document.querySelectorAll(".day");
+document.querySelectorAll(
+    ".day"
+);
 
 const saveButton =
-document.getElementById("savePreferences");
+document.getElementById(
+    "savePreferences"
+);
 
 const notificationButton =
-document.getElementById("enableNotifications");
+document.getElementById(
+    "enableNotifications"
+);
 
 const languageSelect =
-document.getElementById("language");
+document.getElementById(
+    "language"
+);
 
 const timeInput =
-document.getElementById("notificationTime");
+document.getElementById(
+    "notificationTime"
+);
 
 const usernameInput =
-document.getElementById("username");
+document.getElementById(
+    "username"
+);
 
 
 // ==========================
-// INICIALIZAÇÃO
+// AUTH STATE
 // ==========================
 
-window.addEventListener(
-    "load",
-    async () => {
+watchAuthState(
+    async user => {
+
+        if(!user){
+
+            authSection.style.display =
+            "block";
+
+            preferencesSection.style.display =
+            "none";
+
+            return;
+
+        }
+
+        localStorage.setItem(
+            "pulseUID",
+            user.uid
+        );
 
         try{
 
-            await initializeUser();
+            const cloudPreferences =
+            await loadPreferencesFromCloud();
+
+            if(
+                cloudPreferences &&
+                cloudPreferences.username
+            ){
+
+                localStorage.setItem(
+
+                    "retropixelPulsePreferences",
+
+                    JSON.stringify(
+                        cloudPreferences
+                    )
+
+                );
+
+                localStorage.setItem(
+                    "pulseUsername",
+                    cloudPreferences.username
+                );
+
+                window.location.href =
+                "feed.html";
+
+                return;
+
+            }
 
         }
         catch(error){
 
             console.error(
-                "Erro ao inicializar usuário:",
                 error
             );
 
         }
 
-        if ("serviceWorker" in navigator) {
+        authSection.style.display =
+        "none";
 
-            try {
-
-                const registration =
-                await navigator.serviceWorker.register(
-                    "./firebase-messaging-sw.js"
-                );
-
-                console.log(
-                    "✅ Service Worker registrado!",
-                    registration
-                );
-
-            }
-            catch(error){
-
-                console.error(
-                    "❌ Erro ao registrar Service Worker:",
-                    error
-                );
-
-            }
-
-        }
-
-        loadPreferences();
+        preferencesSection.style.display =
+        "block";
 
     }
 );
 
 
 // ==========================
-// SELEÇÃO DE CHIPS
+// CRIAR CONTA
+// ==========================
+
+registerButton.addEventListener(
+    "click",
+    async () => {
+
+        const email =
+        emailInput.value.trim();
+
+        const password =
+        passwordInput.value;
+
+        const confirmPassword =
+        confirmPasswordInput.value;
+
+        if(email === ""){
+
+            alert(
+                "Digite um e-mail."
+            );
+
+            return;
+
+        }
+
+        if(password.length < 6){
+
+            alert(
+                "A senha deve ter pelo menos 6 caracteres."
+            );
+
+            return;
+
+        }
+
+        if(
+            password !==
+            confirmPassword
+        ){
+
+            alert(
+                "As senhas não coincidem."
+            );
+
+            return;
+
+        }
+
+        try{
+
+            await registerUser(
+                email,
+                password
+            );
+
+            alert(
+                "Conta criada com sucesso!"
+            );
+
+        }
+        catch(error){
+
+            alert(
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================
+// LOGIN
+// ==========================
+
+loginButton.addEventListener(
+    "click",
+    async () => {
+
+        const email =
+        emailInput.value.trim();
+
+        const password =
+        passwordInput.value;
+
+        if(
+            email === "" ||
+            password === ""
+        ){
+
+            alert(
+                "Preencha e-mail e senha."
+            );
+
+            return;
+
+        }
+
+        try{
+
+            await loginUser(
+                email,
+                password
+            );
+
+        }
+        catch(error){
+
+            alert(
+                "Falha ao entrar."
+            );
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================
+// CHIPS
 // ==========================
 
 chips.forEach(chip => {
@@ -114,7 +319,7 @@ chips.forEach(chip => {
 
 
 // ==========================
-// SELEÇÃO DE DIAS
+// DIAS
 // ==========================
 
 days.forEach(day => {
@@ -141,7 +346,9 @@ notificationButton.addEventListener(
     "click",
     async () => {
 
-        if(!("Notification" in window)){
+        if(
+            !("Notification" in window)
+        ){
 
             alert(
                 "Seu navegador não suporta notificações."
@@ -152,37 +359,36 @@ notificationButton.addEventListener(
         }
 
         const permission =
-        await Notification.requestPermission();
 
-        if(permission === "granted"){
+        await Notification
+        .requestPermission();
 
-            notificationButton.textContent =
-            "✅ Notificações ativadas";
-
-            notificationButton.disabled =
-            true;
+        if(
+            permission ===
+            "granted"
+        ){
 
             try{
 
                 await registerFCM();
 
-            }
-            catch(error){
+                notificationButton.textContent =
+                "✅ Notificações ativadas";
 
-                console.error(
-                    error
-                );
-
-            }
-
-            try {
+                notificationButton.disabled =
+                true;
 
                 new Notification(
+
                     "Retropixel Pulse™",
+
                     {
+
                         body:
                         "Notificações ativadas com sucesso!"
+
                     }
+
                 );
 
             }
@@ -193,13 +399,6 @@ notificationButton.addEventListener(
                 );
 
             }
-
-        }
-        else{
-
-            alert(
-                "Permissão negada."
-            );
 
         }
 
@@ -218,21 +417,6 @@ saveButton.addEventListener(
         const username =
         usernameInput.value.trim();
 
-const available =
-await isUsernameAvailable(
-    username
-);
-
-if(!available){
-
-    alert(
-        "Este nome de usuário já está em uso."
-    );
-
-    return;
-
-}
-
         if(username === ""){
 
             alert(
@@ -243,10 +427,21 @@ if(!available){
 
         }
 
-        localStorage.setItem(
-            "pulseUsername",
+        const available =
+
+        await isUsernameAvailable(
             username
         );
+
+        if(!available){
+
+            alert(
+                "Este nome de usuário já está em uso."
+            );
+
+            return;
+
+        }
 
         const selectedThemes = [];
         const selectedSources = [];
@@ -267,7 +462,9 @@ if(!available){
         ];
 
         document
-        .querySelectorAll(".chip.selected")
+        .querySelectorAll(
+            ".chip.selected"
+        )
         .forEach(chip => {
 
             const text =
@@ -295,7 +492,9 @@ if(!available){
         });
 
         document
-        .querySelectorAll(".day.selected")
+        .querySelectorAll(
+            ".day.selected"
+        )
         .forEach(day => {
 
             selectedDays.push(
@@ -303,12 +502,6 @@ if(!available){
             );
 
         });
-
-        const language =
-        languageSelect.value;
-
-        const notificationTime =
-        timeInput.value;
 
         if(
             selectedThemes.length === 0
@@ -347,7 +540,7 @@ if(!available){
         }
 
         if(
-            notificationTime === ""
+            timeInput.value === ""
         ){
 
             alert(
@@ -362,7 +555,8 @@ if(!available){
 
             username,
 
-            language,
+            language:
+            languageSelect.value,
 
             themes:
             selectedThemes,
@@ -373,17 +567,28 @@ if(!available){
             days:
             selectedDays,
 
-            notificationTime,
+            notificationTime:
+            timeInput.value,
 
             notificationsEnabled:
+
             Notification.permission ===
             "granted",
 
             createdAt:
+
             new Date()
             .toISOString()
 
         };
+
+        localStorage.setItem(
+
+            "pulseUsername",
+
+            username
+
+        );
 
         localStorage.setItem(
 
@@ -401,139 +606,25 @@ if(!available){
                 preferences
             );
 
-            console.log(
-                "✅ Preferências salvas na nuvem"
+            alert(
+                "Preferências salvas!"
             );
+
+            window.location.href =
+            "feed.html";
 
         }
         catch(error){
 
             console.error(
-                "Erro ao salvar no Firestore:",
                 error
             );
 
+            alert(
+                "Erro ao salvar preferências."
+            );
+
         }
-
-        alert(
-            "Preferências salvas!"
-        );
-
-        window.location.href =
-        "feed.html";
 
     }
 );
-
-
-// ==========================
-// CARREGAR PREFERÊNCIAS
-// ==========================
-
-function loadPreferences(){
-
-    const username =
-
-    localStorage.getItem(
-        "pulseUsername"
-    );
-
-    if(
-        username &&
-        usernameInput
-    ){
-
-        usernameInput.value =
-        username;
-
-    }
-
-    const saved =
-
-    localStorage.getItem(
-        "retropixelPulsePreferences"
-    );
-
-    if(!saved){
-
-        return;
-
-    }
-
-    const preferences =
-    JSON.parse(saved);
-
-    languageSelect.value =
-    preferences.language;
-
-    timeInput.value =
-    preferences.notificationTime;
-
-    document
-    .querySelectorAll(".chip")
-    .forEach(chip => {
-
-        const text =
-        chip.textContent.trim();
-
-        if(
-
-            preferences.themes.includes(
-                text
-            )
-
-            ||
-
-            preferences.sources.includes(
-                text
-            )
-
-        ){
-
-            chip.classList.add(
-                "selected"
-            );
-
-        }
-
-    });
-
-    document
-    .querySelectorAll(".day")
-    .forEach(day => {
-
-        const text =
-        day.textContent.trim();
-
-        if(
-
-            preferences.days.includes(
-                text
-            )
-
-        ){
-
-            day.classList.add(
-                "selected"
-            );
-
-        }
-
-    });
-
-    if(
-
-        Notification.permission ===
-        "granted"
-
-    ){
-
-        notificationButton.textContent =
-        "✅ Notificações ativadas";
-
-        notificationButton.disabled =
-        true;
-
-    }
-
-}
