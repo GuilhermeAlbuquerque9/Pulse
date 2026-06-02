@@ -74,18 +74,61 @@ export async function fetchRSSFeed(url){
 // BUSCAR TODOS OS FEEDS
 // ==========================
 
-export async function fetchAllRSS(){
+export async function fetchAllRSS(selectedSources = []){
 
     let allNews = [];
 
-    for(
-        const feed
-        of
-        Object.values(RSS_FEEDS)
-    ){
+    const sourceMap = {
+
+        "TechCrunch":
+        RSS_FEEDS.techcrunch,
+
+        "The Verge":
+        RSS_FEEDS.verge,
+
+        "Polygon":
+        RSS_FEEDS.polygon,
+
+        "Reuters":
+        RSS_FEEDS.reuters,
+
+        "BBC":
+        RSS_FEEDS.bbc
+
+    };
+
+    const feedsToLoad =
+
+    selectedSources.length > 0
+
+    ? selectedSources
+
+    : Object.keys(sourceMap);
+
+    for(const source of feedsToLoad){
+
+        const feedUrl =
+        sourceMap[source];
+
+        if(!feedUrl){
+
+            continue;
+
+        }
 
         const news =
-        await fetchRSSFeed(feed);
+        await fetchRSSFeed(
+            feedUrl +
+            "?t=" +
+            Date.now()
+        );
+
+        news.forEach(item => {
+
+            item.source =
+            source;
+
+        });
 
         allNews =
         allNews.concat(news);
