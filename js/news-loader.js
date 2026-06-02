@@ -5,41 +5,45 @@ from "./rss.js";
 
 export async function loadRealNews(){
 
-    const rssItems =
-    await fetchAllRSS();
+    const preferences =
 
-    // Agrupa por fonte
-    const sourceMap =
-    {};
+    JSON.parse(
+
+        localStorage.getItem(
+            "retropixelPulsePreferences"
+        )
+
+    ) || {};
+
+    const selectedSources =
+
+    preferences.sources || [];
+
+    const rssItems =
+
+    await fetchAllRSS(
+        selectedSources
+    );
+
+    const sourceMap = {};
 
     rssItems.forEach(item => {
 
         const source =
-
         item.source ||
-
-        item.feed ||
-
-        item.creator ||
-
         "Desconhecida";
 
         if(
             !sourceMap[source]
         ){
 
-            sourceMap[source] =
-            [];
+            sourceMap[source] = [];
 
         }
 
-        // Máximo 3 notícias por fonte
-
         if(
-
             sourceMap[source]
             .length < 3
-
         ){
 
             sourceMap[source]
@@ -49,16 +53,11 @@ export async function loadRealNews(){
 
     });
 
-    // Junta tudo novamente
-
     const filteredNews =
 
     Object.values(
         sourceMap
     ).flat();
-
-    // Ordena por data
-    // (mais recentes primeiro)
 
     filteredNews.sort(
         (a,b) =>
@@ -107,14 +106,7 @@ export async function loadRealNews(){
         item.thumbnail || "",
 
         source:
-
-        item.source ||
-
-        item.feed ||
-
-        item.creator ||
-
-        "Desconhecida"
+        item.source
 
     }));
 
