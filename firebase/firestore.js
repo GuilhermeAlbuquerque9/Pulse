@@ -2,20 +2,35 @@ import { app }
 from "./firebase-config.js";
 
 import {
+
     getFirestore,
+
     doc,
+
     setDoc,
+
     getDoc,
+
     deleteDoc,
+
     collection,
+
     query,
+
     where,
+
     getDocs
+
 }
 from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const db =
 getFirestore(app);
+
+
+// ==========================
+// SALVAR PREFERÊNCIAS
+// ==========================
 
 export async function saveUserPreferences(
     uid,
@@ -43,11 +58,18 @@ export async function saveUserPreferences(
     }
     catch(error){
 
-        console.error(error);
+        console.error(
+            error
+        );
 
     }
 
 }
+
+
+// ==========================
+// CARREGAR PREFERÊNCIAS
+// ==========================
 
 export async function loadUserPreferences(
     uid
@@ -67,7 +89,9 @@ export async function loadUserPreferences(
 
         );
 
-        if(snapshot.exists()){
+        if(
+            snapshot.exists()
+        ){
 
             return snapshot.data();
 
@@ -78,7 +102,9 @@ export async function loadUserPreferences(
     }
     catch(error){
 
-        console.error(error);
+        console.error(
+            error
+        );
 
         return null;
 
@@ -86,52 +112,166 @@ export async function loadUserPreferences(
 
 }
 
+
+// ==========================
+// USERNAME JÁ EXISTE?
+// ==========================
+
 export async function usernameExists(
     username
 ){
 
-    const q = query(
+    try{
 
-        collection(
-            db,
-            "users"
-        ),
+        const q =
 
-        where(
-            "username",
-            "==",
-            username
-        )
+        query(
 
-    );
+            collection(
+                db,
+                "users"
+            ),
 
-    const snapshot =
-    await getDocs(q);
+            where(
+                "username",
+                "==",
+                username
+            )
 
-    return !snapshot.empty;
+        );
+
+        const snapshot =
+
+        await getDocs(q);
+
+        return !snapshot.empty;
+
+    }
+    catch(error){
+
+        console.error(
+            error
+        );
+
+        return false;
+
+    }
 
 }
+
+
+// ==========================
+// EXCLUIR CONTA
+// ==========================
 
 export async function deleteAccountData(
     uid
 ){
 
-    const collections = [
+    try{
 
-        "likes",
-        "dislikes",
-        "history",
-        "tokens"
+        // USERS
 
-    ];
+        await deleteDoc(
 
-    for(const collectionName of collections){
+            doc(
+                db,
+                "users",
+                uid
+            )
 
-        const q = query(
+        );
+
+        // COLEÇÕES RELACIONADAS
+
+        const collections = [
+
+            "likes",
+
+            "dislikes",
+
+            "history",
+
+            "tokens"
+
+        ];
+
+        for(
+            const collectionName
+            of
+            collections
+        ){
+
+            const q =
+
+            query(
+
+                collection(
+                    db,
+                    collectionName
+                ),
+
+                where(
+                    "uid",
+                    "==",
+                    uid
+                )
+
+            );
+
+            const snapshot =
+
+            await getDocs(q);
+
+            for(
+                const document
+                of
+                snapshot.docs
+            ){
+
+                await deleteDoc(
+                    document.ref
+                );
+
+            }
+
+        }
+
+        console.log(
+            "🗑️ Conta removida"
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
+// ==========================
+// LIMPAR HISTÓRICO
+// ==========================
+
+export async function clearUserHistory(
+    uid
+){
+
+    try{
+
+        const q =
+
+        query(
 
             collection(
                 db,
-                collectionName
+                "history"
             ),
 
             where(
@@ -143,9 +283,14 @@ export async function deleteAccountData(
         );
 
         const snapshot =
+
         await getDocs(q);
 
-        for(const document of snapshot.docs){
+        for(
+            const document
+            of
+            snapshot.docs
+        ){
 
             await deleteDoc(
                 document.ref
@@ -153,16 +298,17 @@ export async function deleteAccountData(
 
         }
 
+        console.log(
+            "📖 Histórico removido"
+        );
+
     }
+    catch(error){
 
-    await deleteDoc(
+        console.error(
+            error
+        );
 
-        doc(
-            db,
-            "users",
-            uid
-        )
-
-    );
+    }
 
 }
