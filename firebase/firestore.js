@@ -5,7 +5,12 @@ import {
     getFirestore,
     doc,
     setDoc,
-    getDoc
+    getDoc,
+    deleteDoc,
+    collection,
+    query,
+    where,
+    getDocs
 }
 from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
@@ -78,5 +83,86 @@ export async function loadUserPreferences(
         return null;
 
     }
+
+}
+
+export async function usernameExists(
+    username
+){
+
+    const q = query(
+
+        collection(
+            db,
+            "users"
+        ),
+
+        where(
+            "username",
+            "==",
+            username
+        )
+
+    );
+
+    const snapshot =
+    await getDocs(q);
+
+    return !snapshot.empty;
+
+}
+
+export async function deleteAccountData(
+    uid
+){
+
+    const collections = [
+
+        "likes",
+        "dislikes",
+        "history",
+        "tokens"
+
+    ];
+
+    for(const collectionName of collections){
+
+        const q = query(
+
+            collection(
+                db,
+                collectionName
+            ),
+
+            where(
+                "uid",
+                "==",
+                uid
+            )
+
+        );
+
+        const snapshot =
+        await getDocs(q);
+
+        for(const document of snapshot.docs){
+
+            await deleteDoc(
+                document.ref
+            );
+
+        }
+
+    }
+
+    await deleteDoc(
+
+        doc(
+            db,
+            "users",
+            uid
+        )
+
+    );
 
 }
