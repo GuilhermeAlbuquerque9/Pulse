@@ -5,7 +5,8 @@ from "./auth.js";
 
 import {
     saveUserPreferences,
-    loadUserPreferences
+    loadUserPreferences,
+    usernameExists
 }
 from "./firestore.js";
 
@@ -38,6 +39,16 @@ export async function initializeUser(){
 
 }
 
+export async function isUsernameAvailable(
+    username
+){
+
+    return !(await usernameExists(
+        username
+    ));
+
+}
+
 export async function savePreferencesToCloud(
     preferences
 ){
@@ -48,10 +59,6 @@ export async function savePreferencesToCloud(
     );
 
     if(!uid){
-
-        console.error(
-            "UID não encontrado."
-        );
 
         return;
 
