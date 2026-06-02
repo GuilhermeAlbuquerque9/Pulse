@@ -1,33 +1,43 @@
 import {
-    anonymousLogin
+
+    getCurrentUser
+
 }
 from "./auth.js";
 
 import {
+
     saveUserPreferences,
+
     loadUserPreferences,
+
     usernameExists
+
 }
 from "./firestore.js";
+
+
+// ==========================
+// USUÁRIO ATUAL
+// ==========================
 
 export async function initializeUser(){
 
     const user =
-    await anonymousLogin();
+    getCurrentUser();
 
     if(!user){
-
-        console.error(
-            "Falha ao criar usuário."
-        );
 
         return null;
 
     }
 
     localStorage.setItem(
+
         "pulseUID",
+
         user.uid
+
     );
 
     console.log(
@@ -39,68 +49,121 @@ export async function initializeUser(){
 
 }
 
+
+// ==========================
+// VERIFICAR USERNAME
+// ==========================
+
 export async function isUsernameAvailable(
     username
 ){
 
-    return !(await usernameExists(
+    if(!username){
+
+        return false;
+
+    }
+
+    const exists =
+
+    await usernameExists(
         username
-    ));
+    );
+
+    return !exists;
 
 }
+
+
+// ==========================
+// SALVAR NA NUVEM
+// ==========================
 
 export async function savePreferencesToCloud(
     preferences
 ){
 
-    const uid =
-    localStorage.getItem(
-        "pulseUID"
-    );
+    const user =
+    getCurrentUser();
 
-    if(!uid){
+    if(!user){
+
+        console.error(
+            "Usuário não autenticado."
+        );
 
         return;
 
     }
 
-    const username =
-    localStorage.getItem(
-        "pulseUsername"
-    );
-
     const data = {
 
-        uid,
+        uid:
+        user.uid,
 
-        username,
+        email:
+        user.email,
 
         ...preferences
 
     };
 
     await saveUserPreferences(
-        uid,
+
+        user.uid,
+
         data
+
     );
 
 }
 
+
+// ==========================
+// CARREGAR DA NUVEM
+// ==========================
+
 export async function loadPreferencesFromCloud(){
 
-    const uid =
-    localStorage.getItem(
-        "pulseUID"
-    );
+    const user =
+    getCurrentUser();
 
-    if(!uid){
+    if(!user){
 
         return null;
 
     }
 
     return await loadUserPreferences(
-        uid
+        user.uid
     );
+
+}
+
+
+// ==========================
+// DADOS DO USUÁRIO
+// ==========================
+
+export function getUserData(){
+
+    const user =
+    getCurrentUser();
+
+    if(!user){
+
+        return null;
+
+    }
+
+    return {
+
+        uid:
+        user.uid,
+
+        email:
+        user.email
+
+    };
 
 }
